@@ -1,9 +1,10 @@
 # Use Python 3.11 slim image as base
 FROM python:3.11-slim
 
-# Install system dependencies including poppler-utils
+# Install system dependencies including poppler-utils and fonts
 RUN apt-get update && apt-get install -y \
     poppler-utils \
+    fonts-dejavu \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory in container

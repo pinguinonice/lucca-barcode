@@ -34,7 +34,7 @@ def index():
             'logo_size': int(request.form.get('logo_size', 100)) if request.form.get('logo_size') else 100,
             'text_size': int(request.form.get('text_size', 100)) if request.form.get('text_size') else 100,
             'single_size': int(request.form.get('single_size', 100)) if request.form.get('single_size') else 100,
-            'branding': request.form.get('branding', '')
+            'branding': request.form.get('branding', '').replace('\r\n', '\n').strip()  # Handle different line endings
         })
         
         # Handle logo upload
@@ -119,7 +119,7 @@ def generate():
         'logo_size': int(request.form.get('logo_size', 100)) if request.form.get('logo_size') else 100,
         'text_size': int(request.form.get('text_size', 100)) if request.form.get('text_size') else 100,
         'single_size': int(request.form.get('single_size', 100)) if request.form.get('single_size') else 100,
-        'branding': request.form.get('branding', '')
+        'branding': request.form.get('branding', '').replace('\r\n', '\n').strip()  # Handle different line endings
     })
     
     # Handle logo upload

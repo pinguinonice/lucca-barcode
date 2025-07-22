@@ -79,7 +79,7 @@
             </label>
             
             <label>Branding Text: 
-                <input type="text" name="branding" value="{{ settings.branding }}" placeholder="Company name, etc." onchange="updatePreview()">
+                <textarea name="branding" rows="2" placeholder="Company name, etc.&#10;Use Enter key for line breaks" onchange="updatePreview()">{{ settings.branding }}</textarea>
             </label>
             
             <label>Text Size (%): <span id="text-size-value">{{ settings.text_size }}</span>

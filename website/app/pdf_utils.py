@@ -7,6 +7,26 @@ from PIL import Image, ImageDraw, ImageFont
 import tempfile
 import os
 
+# Define a list of system fonts to try
+SYSTEM_FONTS = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Debian/Ubuntu
+    "/usr/share/fonts/TTF/DejaVuSans.ttf",              # Some Linux
+    "/Library/Fonts/Arial.ttf",                          # macOS
+    "C:\\Windows\\Fonts\\arial.ttf",                     # Windows
+    "Arial.ttf",                                         # Try current directory
+    "DejaVuSans.ttf"                                    # Try current directory
+]
+
+def get_system_font(size):
+    """Try to find and return a system font"""
+    for font_path in SYSTEM_FONTS:
+        try:
+            if os.path.exists(font_path):
+                return ImageFont.truetype(font_path, size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
 def generate_barcode_image(number, branding_text="", logo_path=None, logo_size=100, text_size=100):
     """Generate a single barcode image with branding matching the example layout"""
     # Generate barcode with wider bars
@@ -80,23 +100,38 @@ def generate_barcode_image(number, branding_text="", logo_path=None, logo_size=1
         
         # Add branding text on the right
         if branding_text:
-            try:
-                # Use larger font for branding with size adjustment
-                base_font_size = 18
-                adjusted_font_size = int(base_font_size * text_size / 100)  # Apply size percentage
-                font = ImageFont.truetype("Arial.ttf", adjusted_font_size)
-            except:
-                font = ImageFont.load_default()
+            # Use larger font for branding with size adjustment
+            base_font_size = 18
+            adjusted_font_size = int(base_font_size * text_size / 100)  # Apply size percentage
+            font = get_system_font(adjusted_font_size)
+            
+            # Split text into lines
+            lines = branding_text.split('\n')
+            
+            # Calculate total height of all lines
+            line_spacing = adjusted_font_size * 0.3  # 30% of font size for spacing
+            total_text_height = 0
+            line_heights = []
+            
+            for line in lines:
+                bbox = draw.textbbox((0, 0), line, font=font)
+                line_height = bbox[3] - bbox[1]
+                line_heights.append(line_height)
+                total_text_height += line_height
+            
+            # Add spacing between lines (except for last line)
+            total_text_height += line_spacing * (len(lines) - 1)
             
             # Position text to the right of logo
             text_x = logo_width + padding * 2
             
-            # Center text vertically in header
-            bbox = draw.textbbox((0, 0), branding_text, font=font)
-            text_height = bbox[3] - bbox[1]
-            text_y = header_y + (header_height - text_height) // 2
+            # Start position for first line (centered vertically)
+            text_y = header_y + (header_height - total_text_height) // 2
             
-            draw.text((text_x, text_y), branding_text, fill='black', font=font)
+            # Draw each line
+            for i, line in enumerate(lines):
+                draw.text((text_x, text_y), line, fill='black', font=font)
+                text_y += line_heights[i] + line_spacing
         
         y_offset += header_height
     
@@ -107,7 +142,7 @@ def generate_barcode_image(number, branding_text="", logo_path=None, logo_size=1
     
     # Add number below barcode (centered)
     try:
-        number_font = ImageFont.truetype("Arial.ttf", 16)
+        number_font = get_system_font(16)
     except:
         number_font = ImageFont.load_default()
     

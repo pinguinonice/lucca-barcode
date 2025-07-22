@@ -64,7 +64,7 @@ label small {
     margin-top: 0.2em;
 }
 
-input, select { 
+input, select, textarea { 
     width: 100%; 
     padding: 0.7em; 
     margin-top: 0.3em; 
@@ -72,9 +72,16 @@ input, select {
     border-radius: 6px; 
     font-size: 1em;
     transition: border-color 0.3s;
+    font-family: inherit;
 }
 
-input:focus, select:focus {
+textarea {
+    resize: vertical;
+    min-height: 60px;
+    max-height: 150px;
+}
+
+input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #007bff;
 }
