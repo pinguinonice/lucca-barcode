@@ -2,11 +2,39 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import os
 import tempfile
 import time
+from functools import wraps
 from .pdf_utils import generate_barcodes_pdf, generate_preview_image
 
 main = Blueprint('main', __name__)
 
+# Password protection configuration 
+# unsafe, change implementation if you care about security
+PASSWORD = "bücherwurm420"
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('main.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form.get('password') == PASSWORD:
+            session['authenticated'] = True
+            return redirect(url_for('main.index'))
+        return render_template('login.html', error='Invalid password')
+    return render_template('login.html')
+
+@main.route('/logout')
+def logout():
+    session.pop('authenticated', None)
+    return redirect(url_for('main.login'))
+
 @main.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     # Load previous settings from session
     settings = session.get('barcode_settings', {
@@ -87,6 +115,7 @@ def preview():
         return jsonify({'error': str(e)}), 500
 
 @main.route('/generate', methods=['POST'])
+@login_required
 def generate():
     # Process form data first, just like in the index route
     settings = session.get('barcode_settings', {

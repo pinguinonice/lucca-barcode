@@ -9,7 +9,10 @@
 <body>
     <div class="container">
         <div class="options-panel">
-            <h1>Barcode PDF Generator</h1>
+            <div class="header-container">
+                <h1>Barcode PDF Generator</h1>
+                <a href="{{ url_for('main.logout') }}" class="logout-btn">Logout</a>
+            </div>
             <form method="post" enctype="multipart/form-data" id="barcodeForm">
             <label>Start Number: 
                 <input type="number" name="start_number" min="1" value="{{ settings.start_number }}" required onchange="updatePreview()">

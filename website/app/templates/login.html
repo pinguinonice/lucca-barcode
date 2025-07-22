@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Barcode Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2em;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .login-container h1 {
+            margin-bottom: 1em;
+            text-align: center;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        
+        .login-form button {
+            margin-top: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Barcode Generator</h1>
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+        <form method="post" class="login-form">
+            <label>
+                Password:
+                <input type="password" name="password" required autofocus>
+            </label>
+            <button type="submit" class="btn-primary">Login</button>
+        </form>
+    </div>
+</body>
+</html> 
