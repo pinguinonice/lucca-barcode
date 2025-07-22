@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  lucca-barcode:
+    build: .
+    ports:
+      - "5099:5099"
+    volumes:
+      # Mount uploads directory for persistence
+      - ./website/app/static/uploads:/app/website/app/static/uploads
+      # Mount flask_session for persistence (optional)
+      - ./website/flask_session:/app/website/flask_session
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=false
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5099
+      - SECRET_KEY=your-secret-key-here
+    restart: unless-stopped 

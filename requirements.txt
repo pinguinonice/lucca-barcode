@@ -1,0 +1,7 @@
+Flask
+flask-session
+python-barcode
+reportlab
+Pillow
+Werkzeug
+pdf2image 

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode PDF Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="options-panel">
+            <h1>Barcode PDF Generator</h1>
+            <form method="post" enctype="multipart/form-data" id="barcodeForm">
+            <label>Start Number: 
+                <input type="number" name="start_number" min="1" value="{{ settings.start_number }}" required onchange="updatePreview()">
+                {% if settings.next_start_suggestion != settings.start_number %}
+                <small>Suggested next: {{ settings.next_start_suggestion }}</small>
+                {% endif %}
+            </label>
+            
+            <label>How many codes? 
+                <input type="number" name="count" min="1" max="1000" value="{{ settings.count }}" required onchange="updatePreview()">
+            </label>
+            
+            <label>Layout:
+                <select name="layout" onchange="toggleGridOptions(); updatePreview();">
+                    <option value="single" {% if settings.layout == 'single' %}selected{% endif %}>Single (1 per page)</option>
+                    <option value="grid" {% if settings.layout == 'grid' %}selected{% endif %}>Grid (n x m)</option>
+                </select>
+            </label>
+            
+            <div id="single-options" style="display: {% if settings.layout == 'single' %}block{% else %}none{% endif %};">
+                <label>Overall Size (%): <span id="single-size-value">{{ settings.single_size }}</span>
+                    <input type="range" name="single_size" min="30" max="200" step="5" value="{{ settings.single_size }}" 
+                           oninput="updateSliderValue('single-size-value', this.value); updatePreview();" class="spacing-slider">
+                </label>
+                <small style="color: #666;">Adjust the overall size of the entire barcode element</small>
+            </div>
+            
+            <div id="grid-options" style="display: {% if settings.layout == 'grid' %}block{% else %}none{% endif %};">
+                <label>Rows: <input type="number" name="rows" min="1" max="20" value="{{ settings.rows }}" onchange="updatePreview()"></label>
+                <label>Columns: <input type="number" name="cols" min="1" max="10" value="{{ settings.cols }}" onchange="updatePreview()"></label>
+                
+                <label>X-Spacing (mm): <span id="x-spacing-value">{{ settings.x_spacing }}</span>
+                    <input type="range" name="x_spacing" min="-20" max="50" step="0.5" value="{{ settings.x_spacing }}" 
+                           oninput="updateSliderValue('x-spacing-value', this.value); updatePreview();" class="spacing-slider">
+                </label>
+                
+                <label>Y-Spacing (mm): <span id="y-spacing-value">{{ settings.y_spacing }}</span>
+                    <input type="range" name="y_spacing" min="-20" max="50" step="0.5" value="{{ settings.y_spacing }}" 
+                           oninput="updateSliderValue('y-spacing-value', this.value); updatePreview();" class="spacing-slider">
+                </label>
+                
+                <hr style="margin: 1.5em 0; border: none; border-top: 1px solid #e1e5e9;">
+                
+                <label>Left Offset (mm): <span id="left-offset-value">{{ settings.left_offset }}</span>
+                    <input type="range" name="left_offset" min="-30" max="30" step="0.5" value="{{ settings.left_offset }}" 
+                           oninput="updateSliderValue('left-offset-value', this.value); updatePreview();" class="spacing-slider">
+                </label>
+                
+                <label>Top Offset (mm): <span id="top-offset-value">{{ settings.top_offset }}</span>
+                    <input type="range" name="top_offset" min="-30" max="30" step="0.5" value="{{ settings.top_offset }}" 
+                           oninput="updateSliderValue('top-offset-value', this.value); updatePreview();" class="spacing-slider">
+                </label>
+                
+                <small style="color: #666;">
+                    <strong>Spacing:</strong> Positive = gaps, Negative = overlap<br>
+                    <strong>Offset:</strong> Shift entire grid on page<br>
+                    Left: + moves right, - moves left<br>
+                    Top: + moves down, - moves up
+                </small>
+            </div>
+            
+            <label>Logo: <input type="file" name="logo" accept="image/*" onchange="updatePreview()"></label>
+            
+            <label>Logo Size (%): <span id="logo-size-value">{{ settings.logo_size }}</span>
+                <input type="range" name="logo_size" min="20" max="200" step="5" value="{{ settings.logo_size }}" 
+                       oninput="updateSliderValue('logo-size-value', this.value); updatePreview();" class="spacing-slider">
+            </label>
+            
+            <label>Branding Text: 
+                <input type="text" name="branding" value="{{ settings.branding }}" placeholder="Company name, etc." onchange="updatePreview()">
+            </label>
+            
+            <label>Text Size (%): <span id="text-size-value">{{ settings.text_size }}</span>
+                <input type="range" name="text_size" min="50" max="300" step="10" value="{{ settings.text_size }}" 
+                       oninput="updateSliderValue('text-size-value', this.value); updatePreview();" class="spacing-slider">
+            </label>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-secondary">Update & Preview</button>
+                <button type="submit" formaction="{{ url_for('main.generate') }}" class="btn-primary">Download PDF</button>
+            </div>
+            </form>
+        </div>
+        
+        <div class="preview-panel">
+            <div id="preview">
+            {% if settings and settings.has_preview %}
+            <h3>Preview <span id="preview-status"></span></h3>
+            <img id="preview-image" src="{{ url_for('static', filename='preview.png') }}?t={{ settings.timestamp or '' }}" alt="Preview" style="max-width: 100%; border: 1px solid #ddd;">
+            {% elif settings and settings.preview_error %}
+            <h3>Preview Error</h3>
+            <p style="color: red;">{{ settings.preview_error }}</p>
+            {% elif settings %}
+            <h3>Preview <span id="preview-status"></span></h3>
+            <p style="color: #666;">Adjusting settings will update preview automatically</p>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let updateTimeout;
+        let isUpdating = false;
+        
+        function updateSliderValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+        
+        function toggleGridOptions() {
+            const layout = document.querySelector('select[name="layout"]').value;
+            const gridOptions = document.getElementById('grid-options');
+            const singleOptions = document.getElementById('single-options');
+            
+            if (gridOptions) {
+                gridOptions.style.display = layout === 'grid' ? 'block' : 'none';
+            }
+            if (singleOptions) {
+                singleOptions.style.display = layout === 'single' ? 'block' : 'none';
+            }
+        }
+        
+        function updatePreview() {
+            // Debounce to avoid too many requests
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(async () => {
+                if (isUpdating) return;
+                isUpdating = true;
+                
+                const statusElement = document.getElementById('preview-status');
+                const previewImage = document.getElementById('preview-image');
+                
+                try {
+                    if (statusElement) {
+                        statusElement.textContent = '(Updating...)';
+                        statusElement.style.color = '#007bff';
+                    }
+                    
+                    const formData = new FormData(document.getElementById('barcodeForm'));
+                    
+                    const response = await fetch('/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        // Force reload the preview image with cache busting
+                        const timestamp = new Date().getTime();
+                        if (previewImage) {
+                            previewImage.src = `/static/preview.png?t=${timestamp}`;
+                        }
+                        if (statusElement) {
+                            statusElement.textContent = '';
+                        }
+                    } else {
+                        if (statusElement) {
+                            statusElement.textContent = '(Error)';
+                            statusElement.style.color = 'red';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Preview update error:', error);
+                    if (statusElement) {
+                        statusElement.textContent = '(Error)';
+                        statusElement.style.color = 'red';
+                    }
+                } finally {
+                    isUpdating = false;
+                }
+            }, 500); // 500ms delay to avoid too many requests while dragging sliders
+        }
+        
+        // Initial preview update when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure everything is loaded
+            setTimeout(updatePreview, 100);
+        });
+    </script>
+</body>
+</html> 

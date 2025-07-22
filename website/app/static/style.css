@@ -1,0 +1,233 @@
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    background: #f8f9fa; 
+    margin: 0; 
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container { 
+    display: flex;
+    height: 100vh;
+    max-width: none;
+    margin: 0;
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+.options-panel {
+    width: 400px;
+    min-width: 400px;
+    background: #fff;
+    padding: 2em;
+    overflow-y: auto;
+    border-right: 1px solid #e1e5e9;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+
+.preview-panel {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+}
+
+h1 { 
+    text-align: left; 
+    color: #333;
+    margin-bottom: 1.5em;
+    margin-top: 0;
+    font-size: 1.8em;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5em;
+}
+
+label { 
+    display: block; 
+    margin: 1.2em 0 0.4em; 
+    font-weight: 500;
+    color: #555;
+}
+
+label small {
+    display: block;
+    font-weight: normal;
+    color: #007bff;
+    font-size: 0.9em;
+    margin-top: 0.2em;
+}
+
+input, select { 
+    width: 100%; 
+    padding: 0.7em; 
+    margin-top: 0.3em; 
+    border: 2px solid #e1e5e9; 
+    border-radius: 6px; 
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+#grid-options {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    margin-top: 0.5em;
+}
+
+#grid-options label {
+    margin: 0.8em 0 0.2em;
+}
+
+.button-group {
+    display: flex;
+    gap: 1em;
+    margin-top: 2em;
+}
+
+button { 
+    flex: 1;
+    padding: 0.8em 1.5em; 
+    border: none; 
+    border-radius: 6px; 
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer; 
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff; 
+    color: #fff; 
+}
+
+.btn-primary:hover { 
+    background: #0056b3; 
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+#preview { 
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#preview h3 {
+    color: #333;
+    margin-bottom: 1em;
+    margin-top: 0;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+#preview img {
+    max-width: 90%;
+    max-height: 80vh;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    background: white;
+    object-fit: contain;
+}
+
+#preview p {
+    color: #666;
+    text-align: center;
+    margin-top: 2em;
+}
+
+.spacing-slider {
+    width: 100%;
+    margin: 0.5em 0;
+    background: #e1e5e9;
+    border-radius: 50px;
+    height: 8px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.spacing-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.spacing-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#grid-options label span {
+    font-weight: bold;
+    color: #007bff;
+    float: right;
+    background: #f8f9fa;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .options-panel {
+        width: 100%;
+        min-width: auto;
+        border-right: none;
+        border-bottom: 1px solid #e1e5e9;
+        overflow-y: visible;
+    }
+    
+    .preview-panel {
+        min-height: 400px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #f8f9fa;
+    }
+    
+    body {
+        overflow: auto;
+        height: auto;
+    }
+} 
