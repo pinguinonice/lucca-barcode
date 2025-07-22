@@ -1,6 +1,11 @@
 # Use Python 3.11 slim image as base
 FROM python:3.11-slim
 
+# Install system dependencies including poppler-utils
+RUN apt-get update && apt-get install -y \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set working directory in container
 WORKDIR /app
 
@@ -26,6 +31,7 @@ EXPOSE 5099
 ENV PYTHONPATH=/app/website
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
+ENV PATH="/usr/local/bin:${PATH}"
 
 # Run the application
 CMD ["python", "run.py"] 
